@@ -10,16 +10,40 @@ namespace OOP_Warships
 
         const string TrainingGame = "Training.txt";
 
-        private static void GetRowColumn(ref int Row, ref int Column, ref string Mtype)
+        private static void GetRowColumn(ref int Row, ref int Column, ref string Mtype, ref int bombcount)
         {
+            
             Console.WriteLine();
-            Console.Write("Please enter type (M) missile, (B) Bomb: ");
-            Mtype = (Console.ReadLine().ToUpper());
-            Console.Write("Please enter column: ");
+            Console.WriteLine($"BOMB COUNT: {bombcount}\n");
+
+            if (bombcount >0)
+            {
+                Console.Write("Please enter type (M) missile, (B) Bomb: ");
+                Mtype = (Console.ReadLine().ToUpper());
+            }
+            if(bombcount == 0)
+            {
+                
+                Console.Write("\nPlease enter type (M) missile: ");
+                Mtype = (Console.ReadLine().ToUpper());
+            }
+            Console.Write("\nPlease enter column: ");
             Column = Convert.ToInt32(Console.ReadLine());
-            Console.Write("Please enter row: ");
+            while(Column < 0 || Column > 10)
+            {
+                Console.Write("\nPlease enter column: ");
+                Column = Convert.ToInt32(Console.ReadLine());
+            }     
+            Console.Write("\nPlease enter row: ");
             Row = Convert.ToInt32(Console.ReadLine());
+            while(Row < 0 || Row > 10)
+            {
+                Console.Write("\nPlease enter row: ");
+                Row = Convert.ToInt32(Console.ReadLine());
+            }
             Console.WriteLine();
+            Console.Clear();
+            
         }
 
         private static void DisplayMenu()
@@ -30,6 +54,7 @@ namespace OOP_Warships
             Console.WriteLine("2. Load training game");
             Console.WriteLine("9. Quit");
             Console.WriteLine();
+
         }
 
         private static int GetMainMenuChoice()
@@ -46,25 +71,36 @@ namespace OOP_Warships
             bool GameWon = false;
             int row=0;
             int col=0;
+            int bombcnt = 2;
+            bool bombsleft = true;
             string Wtype="";
             while (GameWon == false)
             {
                 Board.PrintBoard();
-                GetRowColumn(ref row, ref col, ref Wtype);
+                GetRowColumn(ref row, ref col, ref Wtype, ref bombcnt);
                 if (Wtype == "M")
                 {
                     Missile MyMissile = new Missile();
                     MyMissile.Fire(row, col, Board);
                 }
-                if (Wtype == "B")
+                if (bombcnt == 0)
+                {
+                    bombsleft = false;
+                }
+                if (Wtype == "B" && bombsleft == true)
                 {
                     Bomb MyBomb = new Bomb();
                     MyBomb.Fire(row, col, Board);
+                    bombcnt -= 1;
                 }
+                
                 if (Board.CheckWin() == true)
                     {
-                        Console.WriteLine("All ships sunk!");
-                        Console.WriteLine();
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("All ships sunk!");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine();
                     }
             }
         }
@@ -83,6 +119,7 @@ namespace OOP_Warships
                 MenuOption = GetMainMenuChoice();
                 if (MenuOption == 1)
                 {
+                    Console.Clear();
                     Board.PlaceRandomShips();
                     PlayGame(ref Board);
                 }
@@ -116,10 +153,12 @@ namespace OOP_Warships
     class Bomb : Missile
     {
         private int blastRadius;
+       
 
         public Bomb()
         {
-            blastRadius = 5;
+            blastRadius = 1;
+            
         }
 
         public override void Fire(int row, int col, GameBoard Board)
@@ -189,6 +228,7 @@ namespace OOP_Warships
                     {
                         Console.Write(" ");
                     }
+                    
                     else
                     {
                         Console.Write(Board[Row, Column]);
@@ -208,7 +248,9 @@ namespace OOP_Warships
                         {
                             if (Board[Row, Column]  == '-')
                             {
+                                
                                 Board[Row, Column] ='m';
+                                
                             }
                             Console.WriteLine("Sorry, (" + Row + "," + Column + ") is a miss.");
                         }
@@ -221,7 +263,9 @@ namespace OOP_Warships
                                     Console.WriteLine("Hit a " + ThisShip.GetName() + " at (" + Column + "," + Row + ").");
                                 }
                             }
+                            
                             Board[Row, Column]= 'h';
+                            
             }
         }
 
